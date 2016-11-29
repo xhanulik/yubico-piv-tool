@@ -75,3 +75,9 @@ global:
     ykpiv_change_puk;
     ykpiv_unblock_pin;
 } YKPIV_1.2.0;
+
+YKPIV_1.5.0
+{
+global:
+    ykpiv_connect2;
+} YKPIV_1.3.0;

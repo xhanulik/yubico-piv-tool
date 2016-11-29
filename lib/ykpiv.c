@@ -128,6 +128,41 @@ ykpiv_rc ykpiv_disconnect(ykpiv_state *state) {
   return YKPIV_OK;
 }
 
+static ykpiv_rc _select_applet(ykpiv_state *state) {
+  APDU apdu;
+  unsigned char data[0xff];
+  unsigned long recv_len = sizeof(data);
+  int sw;
+  ykpiv_rc res;
+
+  memset(apdu.raw, 0, sizeof(apdu));
+  apdu.st.ins = 0xa4;
+  apdu.st.p1 = 0x04;
+  apdu.st.lc = sizeof(aid);
+  memcpy(apdu.st.data, aid, sizeof(aid));
+
+  if((res = send_data(state, &apdu, data, &recv_len, &sw)) != YKPIV_OK) {
+    if(state->verbose) {
+      fprintf(stderr, "Failed communicating with card: '%s'\n", ykpiv_strerror(res));
+    }
+  } else if(sw == SW_SUCCESS) {
+    return YKPIV_OK;
+  } else {
+    if(state->verbose) {
+      fprintf(stderr, "Failed selecting application: %04x\n", sw);
+    }
+  }
+
+  return YKPIV_GENERIC_ERROR;
+}
+
+ykpiv_rc ykpiv_connect2(ykpiv_state *state, long context, long card) {
+  state->context = context;
+  state->card = card;
+
+  return _select_applet(state);
+}
+
 ykpiv_rc ykpiv_connect(ykpiv_state *state, const char *wanted) {
   unsigned long active_protocol;
   char reader_buf[2048];
@@ -162,31 +197,8 @@ ykpiv_rc ykpiv_connect(ykpiv_state *state, const char *wanted) {
       continue;
     }
 
-    {
-      APDU apdu;
-      unsigned char data[0xff];
-      unsigned long recv_len = sizeof(data);
-      int sw;
-      ykpiv_rc res;
-
-      memset(apdu.raw, 0, sizeof(apdu));
-      apdu.st.ins = 0xa4;
-      apdu.st.p1 = 0x04;
-      apdu.st.lc = sizeof(aid);
-      memcpy(apdu.st.data, aid, sizeof(aid));
-
-      if((res = send_data(state, &apdu, data, &recv_len, &sw)) != YKPIV_OK) {
-        if(state->verbose) {
-          fprintf(stderr, "Failed communicating with card: '%s'\n", ykpiv_strerror(res));
-        }
-        continue;
-      } else if(sw == SW_SUCCESS) {
-        return YKPIV_OK;
-      } else {
-        if(state->verbose) {
-          fprintf(stderr, "Failed selecting application: %04x\n", sw);
-        }
-      }
+    if(_select_applet(state) == YKPIV_OK) {
+      return YKPIV_OK;
     }
   }
 
