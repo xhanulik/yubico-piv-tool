@@ -1849,6 +1849,22 @@ read_out:
   return ret;
 }
 
+static bool delete_object(ykpiv_state *state, int id, int verbosity) {
+  ykpiv_rc res;
+
+  if(verbosity) {
+    fprintf(stderr, "Deleting object %x.\n", id);
+  }
+
+  if((res = ykpiv_save_object(state, id, NULL, 0)) != YKPIV_OK) {
+    fprintf(stderr, "Failed writing data to device: %s\n", ykpiv_strerror(res));
+    return false;
+  }
+
+  return true;
+}
+
+
 int main(int argc, char *argv[]) {
   struct gengetopt_args_info args_info;
   ykpiv_state *state;
@@ -1901,6 +1917,7 @@ int main(int argc, char *argv[]) {
         break;
       case action_arg_writeMINUS_object:
       case action_arg_readMINUS_object:
+      case action_arg_deleteMINUS_object:
         if(!args_info.id_given) {
           fprintf(stderr, "The '%s' action needs the --id argument.\n",
               cmdline_parser_action_values[action]);
@@ -1957,6 +1974,7 @@ int main(int argc, char *argv[]) {
       case action_arg_setMINUS_ccc:
       case action_arg_deleteMINUS_certificate:
       case action_arg_writeMINUS_object:
+      case action_arg_deleteMINUS_object:
         if(!authed) {
           unsigned char key[KEY_LEN];
           size_t key_len = sizeof(key);
@@ -2224,6 +2242,11 @@ int main(int argc, char *argv[]) {
       case action_arg_readMINUS_object:
         if(read_object(state, args_info.id_arg, args_info.output_arg,
               args_info.format_arg) == false) {
+          ret = EXIT_FAILURE;
+        }
+        break;
+      case action_arg_deleteMINUS_object:
+        if(delete_object(state, args_info.id_arg, verbosity) == false) {
           ret = EXIT_FAILURE;
         }
         break;
