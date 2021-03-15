@@ -29,7 +29,7 @@ jobs:
         run: |
           set -x
           mkdir build; cd build
-          PKG_CONFIG_PATH=/home/runner/work/yubico-piv-tool/libressl-3.1.1/build/pkgconfig cmake .. -DVERBOSE_CMAKE=ON
+          PKG_CONFIG_PATH=/home/runner/work/yubico-piv-tool/libressl-3.1.1/build/pkgconfig cmake .. -DVERBOSE_CMAKE=ON -DINSTALL_RPATH=/usr/local/lib
           make
           make test
 
@@ -38,8 +38,6 @@ jobs:
           ldd tool/yubico-piv-tool | grep libcrypto.so
           ldd lib/libykpiv.so | grep libcrypto.so
           ldd ykcs11/libykcs11.so | grep libcrypto.so
-
-          ./tool/yubico-piv-tool --help | grep "Usage: yubico-piv-tool"
 
           sudo make install
 
