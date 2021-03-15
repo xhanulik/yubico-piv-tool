@@ -32,8 +32,8 @@ jobs:
           PKG_CONFIG_PATH=/home/runner/work/yubico-piv-tool/libressl-3.1.1/build/pkgconfig cmake .. -DVERBOSE_CMAKE=ON
           make
           make test
-
-          ldd tool/yubico-piv-tool
+          ./tool/yubico-piv-tool --help | grep "Usage: yubico-piv-tool"
+          objdump -T ykcs11/libykcs11.so | grep C_Sign
 
           ldd tool/yubico-piv-tool | grep libcrypto.so
           ldd lib/libykpiv.so | grep libcrypto.so
@@ -43,7 +43,6 @@ jobs:
 
           export LD_LIBRARY_PATH=/usr/local/lib
           yubico-piv-tool --help | grep "Usage: yubico-piv-tool"
-
           objdump -T /usr/local/lib/libykcs11.so | grep C_Sign
 
   job_2:
@@ -74,15 +73,15 @@ jobs:
           PKG_CONFIG_PATH=/usr/local/lib/pkgconfig cmake .. -DVERBOSE_CMAKE=ON
           make
           make test
+          ./tool/yubico-piv-tool --help | grep "Usage: yubico-piv-tool"
+          objdump -T ykcs11/libykcs11.so | grep C_Sign
 
           ldd tool/yubico-piv-tool | grep libcrypto.so
           ldd lib/libykpiv.so | grep libcrypto.so
           ldd ykcs11/libykcs11.so | grep libcrypto.so
 
-          ./tool/yubico-piv-tool --help | grep "Usage: yubico-piv-tool"
-
           sudo make install
 
+          export LD_LIBRARY_PATH=/usr/local/lib
           yubico-piv-tool --help | grep "Usage: yubico-piv-tool"
-
           objdump -T /usr/local/lib/libykcs11.so | grep C_Sign
