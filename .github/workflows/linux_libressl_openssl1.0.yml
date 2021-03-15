@@ -33,9 +33,13 @@ jobs:
           make
           make test
 
+          ldd tool/yubico-piv-tool
+
           ldd tool/yubico-piv-tool | grep libcrypto.so
           ldd lib/libykpiv.so | grep libcrypto.so
           ldd ykcs11/libykcs11.so | grep libcrypto.so
+
+          ./tool/yubico-piv-tool --help | grep "Usage: yubico-piv-tool"
 
           sudo make install
 
