@@ -62,7 +62,7 @@ jobs:
           tar -xzvf openssl-1.0.2u.tar.gz
           cd openssl-1.0.2u
           ./Configure linux-x86_64 shared --prefix=/usr/local
-          make all install VERSION="1.0.2u"
+          sudo make all install VERSION="1.0.2u"
 
       - name: Build and install
         run: |
