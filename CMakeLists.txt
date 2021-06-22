@@ -97,15 +97,16 @@ else()
     find_package (PkgConfig REQUIRED)
 
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w") # -g -O2
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror")
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-format-zero-length -Wno-implicit-fallthrough")
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wformat -Wformat-security")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wshadow")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wwrite-strings")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wmissing-prototypes")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wbad-function-cast")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-protector-all")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
-
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g2")
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer")
 endif()
