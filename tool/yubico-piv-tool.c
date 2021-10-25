@@ -2242,6 +2242,7 @@ int main(int argc, char *argv[]) {
   OpenSSL_add_all_algorithms();
 #endif
 
+  char gets_buf[80];
 
   for(i = 0; i < args_info.action_given; i++) {
     char new_keybuf[KEY_LEN*2+2] = {0}; /* one extra byte for potential \n */
@@ -2252,6 +2253,10 @@ int main(int argc, char *argv[]) {
           cmdline_parser_action_values[action]);
     }
     switch(action) {
+      case action_arg_hold:
+        puts("Press enter to ontinue.");
+        fgets(gets_buf, sizeof(gets_buf), stdin);
+        break;
       case action_arg_version:
         print_version(state, args_info.output_arg);
         break;
