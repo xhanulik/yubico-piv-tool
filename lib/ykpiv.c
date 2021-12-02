@@ -1170,24 +1170,41 @@ static ykpiv_rc _general_authenticate(ykpiv_state *state,
   memcpy(dataptr, sign_in, in_len);
   dataptr += in_len;
 
+retry:
+  if(state->verbose) {
+    fprintf(stderr, "General authenticate with key %x.\n", key);
+  }
+  recv_len = sizeof(data);
   if((res = _ykpiv_transfer_data(state, templ, indata, (long)(dataptr - indata), data, &recv_len, &sw)) != YKPIV_OK) {
     if(state->verbose) {
-      fprintf(stderr, "Sign command failed to communicate with status %x.\n", res);
+      fprintf(stderr, "General authenticate command failed to communicate: %s.\n", ykpiv_strerror(res));
     }
     return res;
   } else if(sw != SW_SUCCESS) {
+    res = YKPIV_GENERIC_ERROR;
     if(state->verbose) {
-      fprintf(stderr, "Sign command failed with code %x.\n", sw);
+      fprintf(stderr, "General authenticate command failed with status %x.\n", sw);
     }
-    if (sw == SW_ERR_SECURITY_STATUS)
-      return YKPIV_AUTHENTICATION_ERROR;
-    else if(sw != SW_SUCCESS)
-      return YKPIV_GENERIC_ERROR;
+    if (sw == SW_ERR_SECURITY_STATUS) {
+      res = YKPIV_AUTHENTICATION_ERROR;
+      if(state->pin) {
+        if(state->verbose) {
+          fprintf(stderr, "Verify cached pin.\n");
+        }
+        if((res = _ykpiv_verify(state, state->pin, strlen(state->pin))) == YKPIV_OK) {
+          goto retry;
+        }
+        if(state->verbose) {
+          fprintf(stderr, "Verify cached pin failed: %s.\n", ykpiv_strerror(res));
+        }
+      }
+    }
+    return res;
   }
   /* skip the first 7c tag */
   if(data[0] != 0x7c) {
     if(state->verbose) {
-      fprintf(stderr, "Failed parsing signature reply.\n");
+      fprintf(stderr, "Failed parsing general authenticate reply.\n");
     }
     return YKPIV_PARSE_ERROR;
   }
@@ -1197,7 +1214,7 @@ static ykpiv_rc _general_authenticate(ykpiv_state *state,
   /* skip the 82 tag */
   if(!offs || *dataptr != 0x82) {
     if(state->verbose) {
-      fprintf(stderr, "Failed parsing signature reply.\n");
+      fprintf(stderr, "Failed parsing general authenticate reply.\n");
     }
     return YKPIV_PARSE_ERROR;
   }
